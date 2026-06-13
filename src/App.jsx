@@ -178,6 +178,7 @@ function Poster({ match, posterRef }) {
             preserveAspectRatio="none"
           />
           {homeFlag === "qa" && <rect x="190" y="746" width="75" height="175" fill="#8a1538"/>}
+          <rect x="48" y="746" width="217" height="175" rx="2" fill="none" stroke="#fff" strokeWidth="3"/>
         </>
       )}
       {!keepOriginalAwayFlag && awayFlag && (
@@ -193,6 +194,7 @@ function Poster({ match, posterRef }) {
             preserveAspectRatio="none"
           />
           {awayFlag === "qa" && <rect x="713" y="746" width="70" height="175" fill="#8a1538"/>}
+          <rect x="579" y="746" width="204" height="175" rx="2" fill="none" stroke="#fff" strokeWidth="3"/>
         </>
       )}
       {!keepOriginalScore && (
