@@ -155,7 +155,7 @@ function Poster({ match, posterRef }) {
           <rect x="55" y="1000" width="330" height="145"/>
         </clipPath>
         <clipPath id="awayScorersArea">
-          <rect x="565" y="1000" width="250" height="145"/>
+          <path d="M565 1000H840L742 1145H565Z"/>
         </clipPath>
       </defs>
       <image
