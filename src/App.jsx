@@ -68,6 +68,7 @@ const BUILT_IN_API = "https://worldcup26.ir/get/games";
 const FALLBACK_API = "https://www.thesportsdb.com/api/v1/json/123/eventsseason.php?id=4429&s=2026";
 const POSTER_WIDTH = 1122;
 const POSTER_HEIGHT = 1402;
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, "")}`;
 
 const emptyDraft = {
   competition: "FIFA World Cup",
@@ -159,7 +160,7 @@ function Poster({ match, posterRef }) {
       </defs>
       <image
         data-asset="exact-template"
-        href="/result-final-template.png"
+        href={assetUrl("result-final-template.png")}
         width={POSTER_WIDTH}
         height={POSTER_HEIGHT}
         preserveAspectRatio="none"
@@ -169,7 +170,7 @@ function Poster({ match, posterRef }) {
           <rect x="44" y="742" width="225" height="183" rx="16" fill="url(#scoreBlue)"/>
           <image
             data-flag={homeFlag}
-            href={`/flags/${homeFlag}.png`}
+            href={assetUrl(`flags/${homeFlag}.png`)}
             x="48"
             y="746"
             width="217"
@@ -184,7 +185,7 @@ function Poster({ match, posterRef }) {
           <rect x="575" y="742" width="212" height="183" rx="16" fill="url(#scoreBlue)"/>
           <image
             data-flag={awayFlag}
-            href={`/flags/${awayFlag}.png`}
+            href={assetUrl(`flags/${awayFlag}.png`)}
             x="579"
             y="746"
             width="204"
@@ -212,19 +213,19 @@ function Poster({ match, posterRef }) {
         </>
       )}
       <g clipPath="url(#winnerTextArea)">
-        <image href="/result-final-template.png" y="-100" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
+        <image href={assetUrl("result-final-template.png")} y="-100" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
       </g>
       <g clipPath="url(#homeNameArea)">
-        <image href="/result-final-template.png" y="-225" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
+        <image href={assetUrl("result-final-template.png")} y="-225" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
       </g>
       <g clipPath="url(#awayNameArea)">
-        <image href="/result-final-template.png" x="310" y="-225" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
+        <image href={assetUrl("result-final-template.png")} x="310" y="-225" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
       </g>
       <g clipPath="url(#homeScorersArea)">
-        <image href="/result-final-template.png" y="-205" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
+        <image href={assetUrl("result-final-template.png")} y="-205" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
       </g>
       <g clipPath="url(#awayScorersArea)">
-        <image href="/result-final-template.png" x="310" y="-205" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
+        <image href={assetUrl("result-final-template.png")} x="310" y="-205" width={POSTER_WIDTH} height={POSTER_HEIGHT}/>
       </g>
 
       <text x="330" y="594" textAnchor="middle" fontFamily="'DM Sans', Arial, sans-serif" fontSize={winnerSize} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
@@ -353,7 +354,7 @@ function Poster({ match, posterRef }) {
       <rect width="1080" height="1350" fill="url(#night)"/>
       <circle cx="830" cy="480" r="450" fill="url(#glow)" opacity=".13"/>
       <g>
-        <image data-asset="reference" href="/trophy-crop.png" x="585" y="72" width="530" height="1210" preserveAspectRatio="xMidYMid meet" opacity=".99"/>
+        <image data-asset="reference" href={assetUrl("trophy-crop.png")} x="585" y="72" width="530" height="1210" preserveAspectRatio="xMidYMid meet" opacity=".99"/>
       </g>
 
       <path
@@ -425,7 +426,7 @@ function Poster({ match, posterRef }) {
         {translateScorers(match.away.scorers).split("\n").slice(0, 4).map((line, index) => <tspan x="552" dy={index ? 41 : 0} key={line + index}>{line}</tspan>)}
       </text>
 
-      <image data-asset="brand-logo" href="/pase-y-gol.png" x="936" y="1262" width="136" height="82" preserveAspectRatio="xMidYMid meet"/>
+      <image data-asset="brand-logo" href={assetUrl("pase-y-gol.png")} x="936" y="1262" width="136" height="82" preserveAspectRatio="xMidYMid meet"/>
     </svg>
   );
 }
@@ -530,15 +531,15 @@ async function blobToDataUrl(blob) {
 }
 
 const POSTER_FONTS = [
-  ["Barlow Condensed", 500, "/fonts/barlow-condensed-500.ttf"],
-  ["Barlow Condensed", 600, "/fonts/barlow-condensed-600.ttf"],
-  ["Barlow Condensed", 700, "/fonts/barlow-condensed-700.ttf"],
-  ["Barlow Condensed", 800, "/fonts/barlow-condensed-800.ttf"],
-  ["Barlow Condensed", 900, "/fonts/barlow-condensed-900.ttf"],
-  ["DM Sans", 400, "/fonts/dm-sans-400.ttf"],
-  ["DM Sans", 500, "/fonts/dm-sans-500.ttf"],
-  ["DM Sans", 600, "/fonts/dm-sans-600.ttf"],
-  ["DM Sans", 700, "/fonts/dm-sans-700.ttf"],
+  ["Barlow Condensed", 500, assetUrl("fonts/barlow-condensed-500.ttf")],
+  ["Barlow Condensed", 600, assetUrl("fonts/barlow-condensed-600.ttf")],
+  ["Barlow Condensed", 700, assetUrl("fonts/barlow-condensed-700.ttf")],
+  ["Barlow Condensed", 800, assetUrl("fonts/barlow-condensed-800.ttf")],
+  ["Barlow Condensed", 900, assetUrl("fonts/barlow-condensed-900.ttf")],
+  ["DM Sans", 400, assetUrl("fonts/dm-sans-400.ttf")],
+  ["DM Sans", 500, assetUrl("fonts/dm-sans-500.ttf")],
+  ["DM Sans", 600, assetUrl("fonts/dm-sans-600.ttf")],
+  ["DM Sans", 700, assetUrl("fonts/dm-sans-700.ttf")],
 ];
 
 let embeddedPosterFontCss;
