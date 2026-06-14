@@ -103,17 +103,73 @@ function Icon({ name, size = 18 }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
+const SPANISH_TEAM_NAMES = {
+  Algeria: "Argelia",
+  Argentina: "Argentina",
+  Australia: "Australia",
+  Austria: "Austria",
+  Belgium: "Bélgica",
+  "Bosnia and Herzegovina": "Bosnia-Herzegovina",
+  "Bosnia-Herzegovina": "Bosnia-Herzegovina",
+  Brazil: "Brasil",
+  Canada: "Canadá",
+  "Cape Verde": "Cabo Verde",
+  Colombia: "Colombia",
+  Croatia: "Croacia",
+  Curaçao: "Curazao",
+  "Czech Republic": "República Checa",
+  "Democratic Republic of the Congo": "R. D. del Congo",
+  "DR Congo": "R. D. del Congo",
+  Ecuador: "Ecuador",
+  Egypt: "Egipto",
+  England: "Inglaterra",
+  France: "Francia",
+  Germany: "Alemania",
+  Ghana: "Ghana",
+  Haiti: "Haití",
+  Iran: "Irán",
+  Iraq: "Irak",
+  "Ivory Coast": "Costa de Marfil",
+  Japan: "Japón",
+  Jordan: "Jordania",
+  Mexico: "México",
+  Morocco: "Marruecos",
+  Netherlands: "Países Bajos",
+  "New Zealand": "Nueva Zelanda",
+  Norway: "Noruega",
+  Panama: "Panamá",
+  Paraguay: "Paraguay",
+  Portugal: "Portugal",
+  Qatar: "Catar",
+  "Saudi Arabia": "Arabia Saudita",
+  Scotland: "Escocia",
+  Senegal: "Senegal",
+  "South Africa": "Sudáfrica",
+  "South Korea": "Corea del Sur",
+  Spain: "España",
+  Sweden: "Suecia",
+  Switzerland: "Suiza",
+  Tunisia: "Túnez",
+  Turkey: "Turquía",
+  USA: "Estados Unidos",
+  "United States": "Estados Unidos",
+  Uruguay: "Uruguay",
+  Uzbekistan: "Uzbekistán",
+};
+
 function Poster({ match, posterRef }) {
   const homeFlag = FLAGS[match.home.code?.toUpperCase()] || match.home.code?.toLowerCase();
   const awayFlag = FLAGS[match.away.code?.toUpperCase()] || match.away.code?.toLowerCase();
+  const homeNameSpanish = SPANISH_TEAM_NAMES[match.home.name] || match.home.name;
+  const awayNameSpanish = SPANISH_TEAM_NAMES[match.away.name] || match.away.name;
   const keepOriginalHomeFlag = homeFlag === "us";
   const keepOriginalAwayFlag = awayFlag === "py";
   const keepOriginalScore = Number(match.home.score) === 4 && Number(match.away.score) === 1;
   const winnerName = Number(match.home.score) === Number(match.away.score)
-    ? "DRAW"
-    : `${Number(match.home.score) > Number(match.away.score) ? match.home.name : match.away.name} WINS`.toUpperCase();
+    ? "EMPATE"
+    : `${Number(match.home.score) > Number(match.away.score) ? homeNameSpanish : awayNameSpanish} GANA`.toUpperCase();
   const scorerLines = (value) => {
-    if (!value || /^(no goals|scorers not supplied)$/i.test(value.trim())) return ["No goals"];
+    if (!value || /^(no goals|scorers not supplied)$/i.test(value.trim())) return ["Sin goles"];
     return value.split("\n").filter(Boolean).slice(0, 4);
   };
   const teamNameSize = (name) => name.length > 22 ? 31 : name.length > 14 ? 37 : 45;
@@ -233,11 +289,11 @@ function Poster({ match, posterRef }) {
       <text x="330" y="594" textAnchor="middle" fontFamily="'DM Sans', Arial, sans-serif" fontSize={winnerSize} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
         {winnerName}
       </text>
-      <text x="171" y="976" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontSize={teamNameSize(match.home.name)} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
-        {match.home.name}
+      <text x="171" y="976" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontSize={teamNameSize(homeNameSpanish)} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
+        {homeNameSpanish}
       </text>
-      <text x="691" y="976" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontSize={teamNameSize(match.away.name)} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
-        {match.away.name}
+      <text x="691" y="976" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontSize={teamNameSize(awayNameSpanish)} fontWeight="700" fill="#fff" textRendering="geometricPrecision">
+        {awayNameSpanish}
       </text>
       <text x="67" y="1032" fontFamily="'DM Sans', Arial, sans-serif" fontSize="25" fontWeight="600" fill="#fff" textRendering="geometricPrecision">
         {scorerLines(match.home.scorers).map((line, index) => (
@@ -561,19 +617,48 @@ async function getEmbeddedPosterFontCss() {
 async function posterToBlob(svgElement) {
   await document.fonts.ready;
   const clone = svgElement.cloneNode(true);
+  const defs = clone.querySelector("defs");
   const fontStyle = document.createElementNS("http://www.w3.org/2000/svg", "style");
   fontStyle.textContent = await getEmbeddedPosterFontCss();
-  clone.querySelector("defs")?.appendChild(fontStyle);
+  defs?.appendChild(fontStyle);
   const images = [...clone.querySelectorAll("image")];
-  await Promise.all(images.map(async (image) => {
+  const imageGroups = new Map();
+  images.forEach((image) => {
     const href = image.getAttribute("href");
     if (!href) return;
+    if (!imageGroups.has(href)) imageGroups.set(href, []);
+    imageGroups.get(href).push(image);
+  });
+
+  await Promise.all([...imageGroups.entries()].map(async ([href, matchingImages], index) => {
     try {
       const response = await fetch(href);
+      if (!response.ok) throw new Error(`Asset returned ${response.status}`);
       const dataUrl = await blobToDataUrl(await response.blob());
-      image.setAttribute("href", dataUrl);
+      if (matchingImages.length === 1 || !defs) {
+        matchingImages.forEach((image) => image.setAttribute("href", dataUrl));
+        return;
+      }
+
+      const reusableImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      const assetId = `embedded-poster-asset-${index}`;
+      reusableImage.setAttribute("id", assetId);
+      reusableImage.setAttribute("href", dataUrl);
+      reusableImage.setAttribute("width", matchingImages[0].getAttribute("width") || String(POSTER_WIDTH));
+      reusableImage.setAttribute("height", matchingImages[0].getAttribute("height") || String(POSTER_HEIGHT));
+      reusableImage.setAttribute("preserveAspectRatio", matchingImages[0].getAttribute("preserveAspectRatio") || "none");
+      defs.appendChild(reusableImage);
+
+      matchingImages.forEach((image) => {
+        const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        [...image.attributes].forEach((attribute) => {
+          if (attribute.name !== "href") use.setAttribute(attribute.name, attribute.value);
+        });
+        use.setAttribute("href", `#${assetId}`);
+        image.replaceWith(use);
+      });
     } catch {
-      image.remove();
+      matchingImages.forEach((image) => image.remove());
     }
   }));
 
@@ -590,9 +675,19 @@ async function posterToBlob(svgElement) {
   const canvas = document.createElement("canvas");
   canvas.width = POSTER_WIDTH;
   canvas.height = POSTER_HEIGHT;
-  canvas.getContext("2d").drawImage(img, 0, 0);
+  const context = canvas.getContext("2d");
+  if (!context) {
+    URL.revokeObjectURL(url);
+    throw new Error("Canvas export is unavailable");
+  }
+  context.drawImage(img, 0, 0);
   URL.revokeObjectURL(url);
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/png", 1));
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Browser could not create the PNG"));
+    }, "image/png", 1);
+  });
 }
 
 function fileNameFor(match) {
@@ -750,10 +845,14 @@ export default function App() {
     try {
       const blob = await posterToBlob(posterRef.current);
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
+      const downloadUrl = URL.createObjectURL(blob);
+      link.href = downloadUrl;
       link.download = fileNameFor(selected);
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(link.href);
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
       flash("Poster downloaded");
     } catch (error) {
       flash(`Export failed: ${error.message}`);
